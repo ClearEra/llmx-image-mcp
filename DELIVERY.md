@@ -54,7 +54,7 @@ llmx-image-mcp/
 
 ### API 对接
 - **Endpoint**: `POST /v1/images/generations`
-- **Base URL**: `https://api.llmx.chat`（可配置）
+- **Base URL**: `https://llmx.chat`（可配置）
 - **认证**: Bearer Token (用户的 LLMX API Key)
 - **响应格式**: `b64_json`（base64 编码图片）
 
@@ -220,7 +220,7 @@ README.md 已包含完整文档，涵盖：
 - **代码仓库**: https://github.com/ClearEra/llmx-image-mcp
 - **问题反馈**: GitHub Issues
 - **LLMX 主站**: https://llmx.chat
-- **API 文档**: https://docs.llmx.chat
+- **API 文档**: https://llmx.chat/docs
 
 ---
 

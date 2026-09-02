@@ -94,7 +94,7 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 | 变量 | 默认值 | 说明 |
 |---|---|---|
 | `LLMX_API_KEY` | 无 | **必需** - 你的 LLMX API Key |
-| `LLMX_BASEURL` | `https://api.llmx.chat` | LLMX API 地址 |
+| `LLMX_BASEURL` | `https://llmx.chat` | LLMX API 地址 |
 | `LLMX_IMAGE_MODEL` | `dall-e-3` | 默认图像模型 |
 | `LLMX_SAVE_DIR` | `~/Pictures/llmx-out` | 图片保存目录 |
 | `LLMX_SAVE_DIR_ROOT` | 同上 | 输出安全根目录 |
@@ -163,7 +163,7 @@ LLMX 支持多种图像生成模型，包括但不限于：
 - **Flux Pro** (`flux-pro`) - 开源高性能模型
 - **Stable Diffusion** 系列 - 多个 SD 变体
 
-具体可用模型请查看 [LLMX 文档](https://docs.llmx.chat)。
+具体可用模型请查看 [LLMX 文档](https://llmx.chat/docs)。
 
 ---
 
@@ -191,7 +191,7 @@ LLMX 支持多种图像生成模型，包括但不限于：
 
 ```json
 {
-  "base_url": "https://api.llmx.chat",
+  "base_url": "https://llmx.chat",
   "default_model": "dall-e-3",
   "default_save_dir": "/Users/ClearEra/Pictures/llmx-out",
   "save_dir_root": "/Users/ClearEra/Pictures/llmx-out",
@@ -340,7 +340,7 @@ A: 是的，每次生成都会消耗你账户的配额。请根据实际需求�
 ## 反馈与支持
 
 - **问题反馈**: [GitHub Issues](https://github.com/ClearEra/llmx-image-mcp/issues)
-- **LLMX 文档**: [docs.llmx.chat](https://docs.llmx.chat)
+- **LLMX 文档**: [llmx.chat/docs](https://llmx.chat/docs)
 - **LLMX 控制台**: [llmx.chat](https://llmx.chat)
 
 ---

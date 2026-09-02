@@ -18,7 +18,7 @@ from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
 # ==================== 配置 ====================
-DEFAULT_BASEURL = os.environ.get("LLMX_BASEURL", "https://api.llmx.chat")
+DEFAULT_BASEURL = os.environ.get("LLMX_BASEURL", "https://llmx.chat")
 API_KEY = os.environ.get("LLMX_API_KEY", "")
 DEFAULT_MODEL = os.environ.get("LLMX_IMAGE_MODEL", "dall-e-3")
 DEFAULT_SAVE_DIR = Path(os.environ.get("LLMX_SAVE_DIR", Path.home() / "Pictures" / "llmx-out"))
