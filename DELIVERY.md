@@ -54,7 +54,7 @@ llmx-image-mcp/
 
 ### API 对接
 - **Endpoint**: `POST /v1/images/generations`
-- **Base URL**: `https://api.llmxapi.com`（可配置）
+- **Base URL**: `https://api.llmx.chat`（可配置）
 - **认证**: Bearer Token (用户的 LLMX API Key)
 - **响应格式**: `b64_json`（base64 编码图片）
 
@@ -146,8 +146,8 @@ git push -u origin main
    - `你的用户名` → `ClearEra`
    
 2. **域名**（如果需要）:
-   - `llmxapi.com` → 你的实际域名
-   - `api.llmxapi.com` → 你的实际 API 地址
+   - `llmx.chat` → 你的实际域名
+   - `api.llmx.chat` → 你的实际 API 地址
 
 ```bash
 # 批量替换（macOS）
@@ -219,8 +219,8 @@ README.md 已包含完整文档，涵盖：
 
 - **代码仓库**: https://github.com/ClearEra/llmx-image-mcp
 - **问题反馈**: GitHub Issues
-- **LLMX 主站**: https://llmxapi.com
-- **API 文档**: https://docs.llmxapi.com
+- **LLMX 主站**: https://llmx.chat
+- **API 文档**: https://docs.llmx.chat
 
 ---
 
