@@ -13,14 +13,14 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from mcp.server import Server
+from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp import types
 
 # ==================== 配置 ====================
 DEFAULT_BASEURL = os.environ.get("LLMX_BASEURL", "https://llmx.chat")
 API_KEY = os.environ.get("LLMX_API_KEY", "")
-DEFAULT_MODEL = os.environ.get("LLMX_IMAGE_MODEL", "dall-e-3")
+DEFAULT_MODEL = os.environ.get("LLMX_IMAGE_MODEL", "gpt-image-2")
 DEFAULT_SAVE_DIR = Path(os.environ.get("LLMX_SAVE_DIR", Path.home() / "Pictures" / "llmx-out"))
 SAVE_DIR_ROOT = Path(os.environ.get("LLMX_SAVE_DIR_ROOT", DEFAULT_SAVE_DIR))
 
@@ -29,9 +29,6 @@ DEFAULT_SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 # HTTP 客户端
 http_client = httpx.AsyncClient(timeout=300.0)
-
-# ==================== MCP Server ====================
-mcp = Server("llmx-image")
 
 
 def _validate_save_dir(save_dir: str | None) -> tuple[Path, str | None]:
@@ -92,64 +89,66 @@ def _save_image(b64_data: str, out_dir: Path, filename: str) -> Path:
     return path
 
 
-# ==================== MCP Tools ====================
+# ==================== MCP 工具定义 ====================
 
-@mcp.list_tools()
-async def list_tools() -> list[Tool]:
+async def handle_list_tools(ctx, params):
     """列出所有可用工具"""
-    return [
-        Tool(
-            name="image_generate",
-            description="文生图：根据 prompt 生成图片",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "prompt": {
-                        "type": "string",
-                        "description": "图像生成提示词，越详细越好"
+    return types.ListToolsResult(
+        tools=[
+            types.Tool(
+                name="image_generate",
+                description="文生图：根据 prompt 生成图片",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "prompt": {
+                            "type": "string",
+                            "description": "图像生成提示词，越详细越好"
+                        },
+                        "model": {
+                            "type": "string",
+                            "description": f"模型名称（可选，默认 {DEFAULT_MODEL}）"
+                        },
+                        "size": {
+                            "type": "string",
+                            "description": "图片尺寸，如 1024x1024、1792x1024（可选，默认 1024x1024）"
+                        },
+                        "quality": {
+                            "type": "string",
+                            "description": "图片质量：standard 或 hd（可选，默认 standard）"
+                        },
+                        "n": {
+                            "type": "integer",
+                            "description": "生成图片数量（可选，默认 1，最大 10）"
+                        },
+                        "save_dir": {
+                            "type": "string",
+                            "description": f"保存目录（可选，默认 {DEFAULT_SAVE_DIR}）"
+                        },
+                        "api_key": {
+                            "type": "string",
+                            "description": "覆盖 LLMX_API_KEY 环境变量（可选）"
+                        }
                     },
-                    "model": {
-                        "type": "string",
-                        "description": "模型名称，如 dall-e-3、flux-pro 等（可选，默认 dall-e-3）"
-                    },
-                    "size": {
-                        "type": "string",
-                        "description": "图片尺寸，如 1024x1024、1792x1024（可选，默认 1024x1024）"
-                    },
-                    "quality": {
-                        "type": "string",
-                        "description": "图片质量：standard 或 hd（可选，默认 standard）"
-                    },
-                    "n": {
-                        "type": "integer",
-                        "description": "生成图片数量（可选，默认 1，最大 10）"
-                    },
-                    "save_dir": {
-                        "type": "string",
-                        "description": f"保存目录（可选，默认 {DEFAULT_SAVE_DIR}）"
-                    },
-                    "api_key": {
-                        "type": "string",
-                        "description": "覆盖 LLMX_API_KEY 环境变量（可选）"
-                    }
-                },
-                "required": ["prompt"]
-            }
-        ),
-        Tool(
-            name="server_info",
-            description="查看当前 LLMX Image MCP 配置信息",
-            inputSchema={
-                "type": "object",
-                "properties": {}
-            }
-        )
-    ]
+                    "required": ["prompt"]
+                }
+            ),
+            types.Tool(
+                name="server_info",
+                description="查看当前 LLMX Image MCP 配置信息",
+                inputSchema={
+                    "type": "object",
+                    "properties": {}
+                }
+            )
+        ]
+    )
 
 
-@mcp.call_tool()
-async def call_tool(name: str, arguments: Any) -> list[TextContent]:
+async def handle_call_tool(ctx, params):
     """处理工具调用"""
+    name = params.name
+    arguments = params.arguments or {}
     
     if name == "server_info":
         info = {
@@ -159,12 +158,16 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             "save_dir_root": str(SAVE_DIR_ROOT),
             "api_key_configured": bool(API_KEY),
         }
-        return [TextContent(type="text", text=json.dumps(info, indent=2, ensure_ascii=False))]
+        return types.CallToolResult(
+            content=[types.TextContent(type="text", text=json.dumps(info, indent=2, ensure_ascii=False))]
+        )
     
     if name == "image_generate":
         prompt = arguments.get("prompt")
         if not prompt:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": "prompt 不能为空"}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": "prompt 不能为空"}))]
+            )
         
         model = arguments.get("model", DEFAULT_MODEL)
         size = arguments.get("size", "1024x1024")
@@ -174,16 +177,22 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
         
         # 验证参数
         if n < 1 or n > 10:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": "n 必须在 1-10 之间"}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": "n 必须在 1-10 之间"}))]
+            )
         
         out_dir, dir_err = _validate_save_dir(arguments.get("save_dir"))
         if dir_err:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": dir_err}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": dir_err}))]
+            )
         
         try:
             key = _get_key(api_key)
         except ValueError as e:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": str(e)}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": str(e)}))]
+            )
         
         # 调用 API
         json_body = {
@@ -199,17 +208,23 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
         
         if not (200 <= status < 300):
             error_msg = f"HTTP {status}: {text[:200]}"
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": error_msg}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": error_msg}))]
+            )
         
         # 解析响应
         try:
             resp = json.loads(text)
             data = resp.get("data", [])
         except json.JSONDecodeError as e:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": f"JSON 解析失败: {e}"}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": f"JSON 解析失败: {e}"}))]
+            )
         
         if not data:
-            return [TextContent(type="text", text=json.dumps({"ok": False, "error": "API 未返回图片数据"}))]
+            return types.CallToolResult(
+                content=[types.TextContent(type="text", text=json.dumps({"ok": False, "error": "API 未返回图片数据"}))]
+            )
         
         # 保存图片
         saved = []
@@ -244,15 +259,26 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             "errors": errors
         }
         
-        return [TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+        return types.CallToolResult(
+            content=[types.TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
+        )
     
-    return [TextContent(type="text", text=json.dumps({"error": f"未知工具: {name}"}))]
+    return types.CallToolResult(
+        content=[types.TextContent(type="text", text=json.dumps({"error": f"未知工具: {name}"}))]
+    )
 
 
 async def main():
     """启动 MCP Server"""
+    server = Server(
+        "llmx-image",
+        version="0.1.0",
+        on_list_tools=handle_list_tools,
+        on_call_tool=handle_call_tool,
+    )
+    
     async with stdio_server() as (read_stream, write_stream):
-        await mcp.run(read_stream, write_stream, mcp.create_initialization_options())
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 if __name__ == "__main__":
