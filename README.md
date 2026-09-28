@@ -10,8 +10,11 @@
 
 | Tool | 说明 |
 |---|---|
-| `image_generate` | 文生图：根据提示词生成图片，支持多种模型和尺寸 |
-| `server_info` | 查看当前配置信息（API 地址、模型、保存目录等） |
+| `image_generate` | 文生图，默认 `gpt-image-2`（可配置 Flare） |
+| `image_edit` | 单张本地 PNG/JPEG/WebP 参考图编辑，走 `/v1/images/edits` |
+| `image_batch_edit` | 对 1–20 张图片逐张串行执行相同指令，逐张报告成功/失败 |
+| `image_multi_reference` | 2–10 张参考图通过 `image[]` 融合成一张图 |
+| `server_info` | 查看配置、尺寸规则、重试与安全约束（不显示密钥） |
 
 ---
 
@@ -79,11 +82,16 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 给我生成 3 张不同风格的 logo 草图，主题是科技公司
 ```
 
-### 高清模式
+### 编辑与多图参考
 
 ```
-用 hd 质量生成一张产品渲染图
+把 /path/to/a.png 的背景换成蓝色
+将 /path/to/a.png 和 /path/to/b.png 作为参考合成一张新海报
 ```
+
+### 模型与质量
+
+可在客户端环境中将 `LLMX_IMAGE_MODEL` 设为 `gpt-image-2.5-flare`，将 `LLMX_EDIT_MODEL` 设为 `gpt-image-2.5-sunburst`；2.5 模型接受 `quality=max`。这些是可配置参数，**252 的通用路由并不能证明渠道已经开放对应模型或支持该质量/尺寸**。先用小尺寸低成本请求验证，再扩大使用。留空 `quality` 时由上游决定。
 
 ---
 
@@ -95,7 +103,8 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 |---|---|---|
 | `LLMX_API_KEY` | 无 | **必需** - 你的 LLMX API Key |
 | `LLMX_BASEURL` | `https://llmx.chat` | LLMX API 地址 |
-| `LLMX_IMAGE_MODEL` | `dall-e-3` | 默认图像模型 |
+| `LLMX_IMAGE_MODEL` | `gpt-image-2` | 默认文生图模型；确认渠道支持后可设置 `gpt-image-2.5-flare` |
+| `LLMX_EDIT_MODEL` | 与 `LLMX_IMAGE_MODEL` 相同 | 默认编辑模型；确认渠道支持后可设置 `gpt-image-2.5-sunburst` |
 | `LLMX_SAVE_DIR` | `~/Pictures/llmx-out` | 图片保存目录 |
 | `LLMX_SAVE_DIR_ROOT` | 同上 | 输出安全根目录 |
 
@@ -292,6 +301,8 @@ llmx-image-mcp/
 
 ### 本地测试
 
+离线工具测试（不调用付费 API）：`python3 -m unittest test_tools -v`。
+
 ```bash
 # 设置环境变量
 export LLMX_API_KEY="sk-your-api-key"
@@ -325,7 +336,7 @@ A: 修改配置文件中的 `LLMX_API_KEY` 环境变量，然后重启客户端�
 
 **Q: 支持图片编辑（image-to-image）吗？**
 
-A: 当前版本仅支持文生图（text-to-image）。图片编辑功能将在后续版本提供。
+A: 支持。`image_edit` 接受一张本地图片，`image_batch_edit` 为逐张独立编辑，`image_multi_reference` 通过 multipart `image[]` 传入 2–10 张参考图。实际模型支持取决于 LLMX 渠道设置。
 
 **Q: 为什么有些模型不可用？**
 
