@@ -108,6 +108,8 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 | `LLMX_SAVE_DIR` | `~/Pictures/llmx-out` | 图片保存目录 |
 | `LLMX_SAVE_DIR_ROOT` | 同上 | 输出安全根目录 |
 
+上游 HTTP 默认超时为 **300 秒（5 分钟）**，`server_info.http_timeout_seconds` 可查看当前值。这个值只控制 MCP 服务端等待图像 API 的时间；如果客户端在约 90 秒就报 `Request timed out`，还必须在该客户端的 MCP 工具调用设置中单独延长超时，更新本仓库无法覆盖客户端的超时。
+
 ### 手动配置
 
 如果你想手动配置而不使用安装脚本：

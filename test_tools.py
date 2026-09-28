@@ -37,6 +37,7 @@ class ToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({tool.name for tool in tools.tools}, {"image_generate", "image_edit", "image_batch_edit", "image_multi_reference", "server_info"})
         info = await self.call("server_info")
         self.assertTrue(info["api_key_configured"])
+        self.assertEqual(info["http_timeout_seconds"], 300)
         self.assertNotIn("test", json.dumps(info))
 
     async def test_generation_and_edit_routes(self):

@@ -27,7 +27,9 @@ MAX_INPUT = 4 * 1024 * 1024
 MAX_TOTAL = 8 * 1024 * 1024
 MAX_OUTPUT = 25 * 1024 * 1024
 RETRY_STATUSES = {408, 429, 500, 502, 503, 504, 520, 522, 524}
-http_client = httpx.AsyncClient(timeout=300.0, follow_redirects=False)
+# MCP 客户端自己的工具调用超时必须在客户端单独配置；此值只控制上游 HTTP 等待。
+HTTP_TIMEOUT_SECONDS = 5 * 60
+http_client = httpx.AsyncClient(timeout=HTTP_TIMEOUT_SECONDS, follow_redirects=False)
 
 
 def _error(message: str) -> dict[str, Any]:
@@ -239,6 +241,7 @@ async def handle_call_tool(ctx, params):
         if name == "server_info":
             result = {"base_url": BASE_URL, "default_models": {"image_generate": GEN_MODEL, "edits": EDIT_MODEL},
                       "default_save_dir": str(SAVE_DIR), "save_dir_root": str(SAVE_ROOT), "api_key_configured": bool(API_KEY),
+                      "http_timeout_seconds": HTTP_TIMEOUT_SECONDS,
                       "size_rules": "WxH，16 倍数，边长 256-3840，像素 655360-8294400，宽高比 <=3；后端能力取决于渠道",
                       "quality": "2.5: auto/low/medium/high/xhigh/max；其他: auto/low/medium/high/standard/hd；以渠道实际支持为准",
                       "retry_policy": "仅明确的 408/429/5xx 最多重试 1 次；网络超时不重试以防重复计费",
