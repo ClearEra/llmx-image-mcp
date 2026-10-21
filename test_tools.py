@@ -38,6 +38,10 @@ class ToolTests(unittest.IsolatedAsyncioTestCase):
         info = await self.call("server_info")
         self.assertTrue(info["api_key_configured"])
         self.assertEqual(info["http_timeout_seconds"], 300)
+        self.assertEqual(info["default_models"]["image_generate"], "gpt-image-2.5-flare")
+        self.assertEqual(info["default_models"]["image_edit"], "gpt-image-2.5-sunburst")
+        self.assertEqual(info["default_models"]["image_batch_edit"], "gpt-image-2.5-sunburst")
+        self.assertEqual(info["default_models"]["image_multi_reference"], "gpt-image-2.5-sunburst")
         self.assertNotIn("test", json.dumps(info))
 
     async def test_generation_and_edit_routes(self):

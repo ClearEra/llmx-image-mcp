@@ -19,8 +19,8 @@ from mcp.server.stdio import stdio_server
 
 BASE_URL = os.environ.get("LLMX_BASEURL", "https://llmx.chat").rstrip("/")
 API_KEY = os.environ.get("LLMX_API_KEY", "")
-GEN_MODEL = os.environ.get("LLMX_IMAGE_MODEL", "gpt-image-2")
-EDIT_MODEL = os.environ.get("LLMX_EDIT_MODEL", GEN_MODEL)
+GEN_MODEL = os.environ.get("LLMX_IMAGE_MODEL", "gpt-image-2.5-flare")
+EDIT_MODEL = os.environ.get("LLMX_EDIT_MODEL", "gpt-image-2.5-sunburst")
 SAVE_DIR = Path(os.environ.get("LLMX_SAVE_DIR", str(Path.home() / "Pictures" / "llmx-out"))).expanduser()
 SAVE_ROOT = Path(os.environ.get("LLMX_SAVE_DIR_ROOT", str(SAVE_DIR))).expanduser()
 MAX_INPUT = 4 * 1024 * 1024
@@ -239,7 +239,10 @@ async def handle_call_tool(ctx, params):
     name, args = params.name, params.arguments or {}
     try:
         if name == "server_info":
-            result = {"base_url": BASE_URL, "default_models": {"image_generate": GEN_MODEL, "edits": EDIT_MODEL},
+            result = {"base_url": BASE_URL, "default_models": {
+                          "image_generate": GEN_MODEL, "image_edit": EDIT_MODEL,
+                          "image_batch_edit": EDIT_MODEL, "image_multi_reference": EDIT_MODEL,
+                      },
                       "default_save_dir": str(SAVE_DIR), "save_dir_root": str(SAVE_ROOT), "api_key_configured": bool(API_KEY),
                       "http_timeout_seconds": HTTP_TIMEOUT_SECONDS,
                       "size_rules": "WxH，16 倍数，边长 256-3840，像素 655360-8294400，宽高比 <=3；后端能力取决于渠道",

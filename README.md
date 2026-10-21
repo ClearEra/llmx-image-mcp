@@ -10,7 +10,7 @@
 
 | Tool | 说明 |
 |---|---|
-| `image_generate` | 文生图，默认 `gpt-image-2`（可配置 Flare） |
+| `image_generate` | 文生图，默认 `gpt-image-2.5-flare` |
 | `image_edit` | 单张本地 PNG/JPEG/WebP 参考图编辑，走 `/v1/images/edits` |
 | `image_batch_edit` | 对 1–20 张图片逐张串行执行相同指令，逐张报告成功/失败 |
 | `image_multi_reference` | 2–10 张参考图通过 `image[]` 融合成一张图 |
@@ -91,7 +91,7 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 
 ### 模型与质量
 
-可在客户端环境中将 `LLMX_IMAGE_MODEL` 设为 `gpt-image-2.5-flare`，将 `LLMX_EDIT_MODEL` 设为 `gpt-image-2.5-sunburst`；2.5 模型接受 `quality=max`。这些是可配置参数，**252 的通用路由并不能证明渠道已经开放对应模型或支持该质量/尺寸**。先用小尺寸低成本请求验证，再扩大使用。留空 `quality` 时由上游决定。
+默认文生图使用 `gpt-image-2.5-flare`，单图编辑、批量编辑、多图参考使用 `gpt-image-2.5-sunburst`；可分别通过 `LLMX_IMAGE_MODEL` 与 `LLMX_EDIT_MODEL` 覆盖。2.5 模型接受 `quality=max`。这些是默认模型配置，**252 的通用路由并不能证明渠道已经开放对应模型或支持该质量/尺寸**。先用小样低成本请求验证，再扩大使用。留空 `quality` 时由上游决定。
 
 ---
 
@@ -103,8 +103,8 @@ AI 会自动调用 `image_generate` 工具，图片会保存到 `~/Pictures/llmx
 |---|---|---|
 | `LLMX_API_KEY` | 无 | **必需** - 你的 LLMX API Key |
 | `LLMX_BASEURL` | `https://llmx.chat` | LLMX API 地址 |
-| `LLMX_IMAGE_MODEL` | `gpt-image-2` | 默认文生图模型；确认渠道支持后可设置 `gpt-image-2.5-flare` |
-| `LLMX_EDIT_MODEL` | 与 `LLMX_IMAGE_MODEL` 相同 | 默认编辑模型；确认渠道支持后可设置 `gpt-image-2.5-sunburst` |
+| `LLMX_IMAGE_MODEL` | `gpt-image-2.5-flare` | 默认文生图模型 |
+| `LLMX_EDIT_MODEL` | `gpt-image-2.5-sunburst` | 单图编辑、批量编辑、多图参考的默认模型 |
 | `LLMX_SAVE_DIR` | `~/Pictures/llmx-out` | 图片保存目录 |
 | `LLMX_SAVE_DIR_ROOT` | 同上 | 输出安全根目录 |
 
